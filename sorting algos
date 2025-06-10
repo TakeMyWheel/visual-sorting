@@ -41,22 +41,63 @@ def quick_sort(arr: list, ascending: bool) -> list:
     return quick_sort(items_lower, ascending) + [pivot] + quick_sort(items_higher, ascending)
 
 
+def heapify(arr: list, n: int, i: int, ascending: bool):
+    extreme = i
+    left = 2 * i + 1
+    right = 2 * i + 2
+
+    if left < n and ((arr[left] > arr[extreme] and ascending) or (arr[left] < arr[extreme] and not ascending)):
+        extreme = left
+
+    if right < n and ((arr[right] > arr[extreme] and ascending) or (arr[right] < arr[extreme] and not ascending)):
+        extreme = right
+
+    if extreme != i:
+        arr[i], arr[extreme] = arr[extreme], arr[i]
+        heapify(arr, n, extreme, ascending)
+
+def heap_sort(arr: list, ascending: bool) -> list:
+    arr = arr[:]
+    n = len(arr)
+
+    
+    for i in range(n // 2 - 1, -1, -1):
+        heapify(arr, n, i, ascending)
+
+   
+    for i in range(n - 1, 0, -1):
+        arr[i], arr[0] = arr[0], arr[i]
+        heapify(arr, i, 0, ascending)
+
+    return arr
+
+
+    
+
+
 ascending_bubble = False
 ascending_insertion = False
 ascending_quick = False
+ascending_heap = False
+
 
 bubble_time = timeit.timeit(lambda: bubble_sort(arr, ascending_bubble), number=10)
 insertion_time = timeit.timeit(lambda: insertion_sort(arr, ascending_insertion), number=10)
 quick_time = timeit.timeit(lambda: quick_sort(arr, ascending_quick), number=10)
+heap_time = timeit.timeit(lambda: heap_sort(arr, ascending_heap), number=10)
 
 sorted_bubble = bubble_sort(arr, ascending_bubble)
 sorted_insertion = insertion_sort(arr, ascending_insertion)
 sorted_quick = quick_sort(arr, ascending_quick)
+sorted_heap = heap_sort(arr, ascending_heap)
 
 print(f"This is bubble sort {'ascending' if ascending_bubble else 'descending'}: \n{sorted_bubble[:20]} ...")
 print(f"This is insertion sort {'ascending' if ascending_insertion else 'descending'}: \n{sorted_insertion[:20]} ...")
 print(f"This is quick sort {'ascending' if ascending_quick else 'descending'}: \n{sorted_quick[:20]} ...")
+print(f"This is heap sort {'ascending' if ascending_heap else 'descending'}: \n{sorted_heap[:20]} ...")
 print()
 print(f"bubble time = {bubble_time:.6f} seconds")
 print(f"insertion time = {insertion_time:.6f} seconds")
 print(f"quick time = {quick_time:.6f} seconds")
+print(f"quick time = {heap_time:.6f} seconds")
+
