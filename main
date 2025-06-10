@@ -46,7 +46,7 @@ def draw(draw_info, algo_name, ascending):
     controls = draw_info.FONT.render("R - Reset | SPACE - Start | A - Ascending | D - Descending", 1, draw_info.GREEN)
     draw_info.window.blit(controls, (draw_info.width / 2 - controls.get_width() / 2, 35))
 
-    sorting_methods = draw_info.FONT.render("B - Bubble Sort | I - Insertion Sort", 1, draw_info.GREEN)
+    sorting_methods = draw_info.FONT.render("B - Bubble Sort | I - Insertion Sort | Q - Quick Sort | Heap Sort", 1, draw_info.GREEN)
     draw_info.window.blit(sorting_methods, (draw_info.width / 2 - sorting_methods.get_width() / 2, 55))
 
     draw_bars(draw_info)
@@ -88,6 +88,7 @@ def bubble_sort(draw_info, ascending):
                 yield True
     return lst
 
+
 def insertion_sort(draw_info, ascending):
     lst = draw_info.lst
 
@@ -106,6 +107,69 @@ def insertion_sort(draw_info, ascending):
             lst[i] = current
             draw_bars(draw_info, {i: draw_info.GREEN, i +1 : draw_info.RED}, True)
             yield True
+
+    return lst
+
+
+def quick_sort(draw_info, ascending):
+    lst = draw_info.lst
+
+    def quick_sort_recursive(start, end):
+        if start >= end:
+            return
+
+        pivot_index = yield from partition(start, end)
+        yield from quick_sort_recursive(start, pivot_index - 1)
+        yield from quick_sort_recursive(pivot_index + 1, end)
+
+    def partition(start, end):
+        pivot = lst[end]
+        i = start - 1
+
+        for j in range(start, end):
+            if (lst[j] <= pivot and ascending) or (lst[j] >= pivot and not ascending):
+                i += 1
+                lst[i], lst[j] = lst[j], lst[i]
+                draw_bars(draw_info, {i: draw_info.GREEN, j: draw_info.RED}, True)
+                yield True
+
+        lst[i + 1], lst[end] = lst[end], lst[i + 1]
+        draw_bars(draw_info, {i + 1: draw_info.GREEN, end: draw_info.RED}, True)
+        yield True
+        return i + 1
+
+    yield from quick_sort_recursive(0, len(lst) - 1)
+    return lst
+
+def heap_sort(draw_info, ascending):
+    lst = draw_info.lst
+    n = len(lst)
+
+    def heapify(n, i):
+        largest_smallest = i
+        l = 2 * i + 1
+        r = 2 * i + 2
+
+        if l < n and ((lst[l]> lst[largest_smallest] and ascending) or (lst[l] < lst[largest_smallest] and not ascending)):
+            largest_smallest = l
+        
+        if r < n and ((lst[r] > lst[largest_smallest] and ascending) or (lst[r] < lst[largest_smallest] and not ascending)):
+            largest_smallest = r
+
+        if largest_smallest != i:
+            lst[i], lst[largest_smallest] = lst[largest_smallest], lst[i]
+            draw_bars(draw_info, {i: draw_info.GREEN, largest_smallest: draw_info.RED}, True)
+            yield True
+            yield from heapify(n, largest_smallest)
+
+    for i in range(n // 2 - 1, -1, -1):
+        yield from heapify(n,i)
+
+    for i in range(n -1, 0, -1):
+        lst[0], lst[i] = lst[i], lst[0]
+        draw_bars(draw_info, {0:draw_info.GREEN, i: draw_info.RED}, True)
+        yield True
+        yield from heapify(i, 0)
 
     return lst
 
@@ -168,6 +232,12 @@ def main():
             elif event.key == pygame.K_i and not sorting:
                 sorting_algo = insertion_sort
                 algo_name = "Insertion Sort"
+            elif event.key == pygame.K_q and not sorting:
+                sorting_algo = quick_sort
+                algo_name = "Quick Sort"
+            elif event.key == pygame.K_h and not sorting:
+                sorting_algo = heap_sort
+                algo_name = "Heap Sort"
 
     pygame.quit()
 
